@@ -1,6 +1,6 @@
 import { InventoryItemSchema, type InventoryItem } from "@/types/inventory-item";
 import { defineStore } from "pinia";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const ROWS = 5;
 const COLS = 5;
@@ -9,25 +9,31 @@ const LOCAL_STORAGE_KEY = "cool-inventory-items";
 
 type ItemsState = InventoryItem | null;
 
-const initialItemsState = (rows: number, cols: number): ItemsState[][] => {
-  const storedItems = localStorage.getItem(LOCAL_STORAGE_KEY);
+const initialItemsState = (
+  rows: number,
+  cols: number,
+  checkLocalStorage: boolean = true
+): ItemsState[][] => {
+  if (checkLocalStorage === true) {
+    const storedItems = localStorage.getItem(LOCAL_STORAGE_KEY);
 
-  if (storedItems != null) {
-    const obj = JSON.parse(storedItems);
-    const result = InventoryItemSchema.nullable().array().array().safeParse(obj);
+    if (storedItems != null) {
+      const obj = JSON.parse(storedItems);
+      const result = InventoryItemSchema.nullable().array().array().safeParse(obj);
 
-    if (result.success) {
-      console.log(`Found stored items in local storage!`);
-      return result.data;
+      if (result.success) {
+        console.log(`Found stored items in local storage!`);
+        return result.data;
+      }
+
+      console.log("Found items in local storage cannot be used due to validation error");
+      console.error(result.error);
+
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      console.error("Local storage item has been removed");
     }
-
-    console.log("Found items in local storage cannot be used due to validation error");
-    console.error(result.error);
-
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    console.error("Local storage item has been removed");
+    console.log("There are no items in local storage, using default values");
   }
-  console.log("There are no items in local storage, using default values");
 
   const items: ItemsState[][] = [];
   for (let i = 0; i < rows; i++) {
@@ -66,15 +72,18 @@ const initialItemsState = (rows: number, cols: number): ItemsState[][] => {
 
 export const useInventoryStore = defineStore("inventory-store", () => {
   const items = ref<ItemsState[][]>(initialItemsState(ROWS, COLS));
-  const selected = ref<[number, number] | null>(null);
 
-  watch(
-    () => items,
-    (s) => {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(s.value));
-    },
-    { deep: true, immediate: true }
-  );
+  const selected = ref<[number | null, number | null]>([null, null]);
+  const selectedItem = computed<InventoryItem | null>(() => {
+    const i = selected.value[0];
+    const j = selected.value[1];
+
+    if (i == null || j == null) {
+      return null;
+    }
+
+    return items.value.at(i)?.at(j) ?? null;
+  });
 
   const move = (
     fromRowIdx: number,
@@ -103,5 +112,37 @@ export const useInventoryStore = defineStore("inventory-store", () => {
     return true;
   };
 
-  return { items, selected, move };
+  const deselect = () => {
+    selected.value = [null, null];
+  };
+
+  const changeCount = (rowIdx: number, colIdx: number, newCount: number) => {
+    const item = items.value?.at(rowIdx)?.at(colIdx);
+    if (item == null) {
+      return;
+    }
+
+    if (newCount <= 0) {
+      items.value[rowIdx][colIdx] = null;
+      return;
+    }
+
+    items.value[rowIdx][colIdx] = { ...item, count: newCount };
+  };
+
+  const reset = () => {
+    deselect();
+    items.value = initialItemsState(ROWS, COLS, false);
+  };
+
+  watch(
+    () => items,
+    (s) => {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(s.value));
+      deselect();
+    },
+    { deep: true, immediate: true }
+  );
+
+  return { items, selected, selectedItem, move, deselect, changeCount, reset };
 });
