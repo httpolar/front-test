@@ -12,7 +12,7 @@ const inventory = useInventoryStore();
 <template>
   <MainWrapper class="flex items-center justify-center">
     <div class="flex w-fit flex-col gap-6">
-      <div>
+      <div class="flex w-full items-center justify-center">
         <Button variant="ghost" @click="inventory.reset">Сбросить состояние</Button>
       </div>
       <div class="flex flex-row gap-6">
