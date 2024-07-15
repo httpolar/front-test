@@ -4,8 +4,10 @@ import { useInventoryStore } from "@/stores/inventory";
 import InventorySelectedItem from "./InventorySelectedItem.vue";
 import InventorySlot from "./InventorySlot.vue";
 import { vOnClickOutside } from "@vueuse/components";
+import { storeToRefs } from "pinia";
 
 const inventory = useInventoryStore();
+const { items, selected, selectedItem } = storeToRefs(inventory);
 </script>
 
 <template>
@@ -13,7 +15,7 @@ const inventory = useInventoryStore();
     class="relative grid auto-cols-[100px] grid-cols-1 gap-[1px] rounded-md border dark:border-neutral-700 dark:bg-neutral-700"
   >
     <div
-      v-for="(chunk, rowIdx) in inventory.items"
+      v-for="(chunk, rowIdx) in items"
       :key="`row-${rowIdx}`"
       class="grid auto-cols-[100px] grid-flow-col grid-rows-1 gap-[1px]"
     >
@@ -25,8 +27,8 @@ const inventory = useInventoryStore();
           cn({
             'rounded-tl-md': rowIdx === 0 && colIdx === 0,
             'rounded-tr-md': rowIdx === 0 && colIdx === chunk.length - 1,
-            'rounded-bl-md': rowIdx === inventory.items.length - 1 && colIdx === 0,
-            'rounded-br-md': rowIdx === inventory.items.length - 1 && colIdx === chunk.length - 1
+            'rounded-bl-md': rowIdx === items.length - 1 && colIdx === 0,
+            'rounded-br-md': rowIdx === items.length - 1 && colIdx === chunk.length - 1
           })
         "
         :rowIdx="rowIdx"
@@ -43,14 +45,10 @@ const inventory = useInventoryStore();
       leaveActiveClass="transition duration-300"
     >
       <InventorySelectedItem
-        v-if="
-          inventory.selectedItem != null &&
-          inventory.selected[0] != null &&
-          inventory.selected[1] != null
-        "
-        :item="inventory.selectedItem"
-        :rowIdx="inventory.selected[0]"
-        :colIdx="inventory.selected[1]"
+        v-if="selectedItem != null && selected[0] != null && selected[1] != null"
+        :item="selectedItem"
+        :rowIdx="selected[0]"
+        :colIdx="selected[1]"
         v-on-click-outside="inventory.deselect"
       ></InventorySelectedItem>
     </Transition>

@@ -3,6 +3,7 @@ import { cn } from "@/lib/cn";
 import { useInventoryStore } from "@/stores/inventory";
 import type { InventoryItem } from "@/types/inventory-item";
 import type { ClassValue } from "clsx";
+import { storeToRefs } from "pinia";
 
 type Props = {
   item?: InventoryItem | null;
@@ -13,6 +14,7 @@ type Props = {
 const props = defineProps<Props>();
 
 const inventory = useInventoryStore();
+const { selected } = storeToRefs(inventory);
 
 const DT_ROW_IDX_KEY = "item-row-idx";
 const DT_COL_IDX_KEY = "item-col-idx";
@@ -55,7 +57,7 @@ const click = () => {
     return;
   }
 
-  inventory.selected = [props.rowIdx, props.colIdx];
+  selected.value = [props.rowIdx, props.colIdx];
 };
 </script>
 
@@ -73,7 +75,7 @@ const click = () => {
     @drop="drop"
     @dragover.prevent
     @dragenter.prevent
-    :data-selected="inventory.selected[0] === rowIdx && inventory.selected[1] === colIdx"
+    :data-selected="selected[0] === rowIdx && selected[1] === colIdx"
   >
     <div
       v-if="item != null"
