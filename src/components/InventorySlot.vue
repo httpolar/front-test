@@ -49,21 +49,31 @@ const drop = (e: DragEvent) => {
 
   inventory.move(fromRowIdx, fromColIdx, props.rowIdx, props.colIdx);
 };
+
+const click = () => {
+  if (props.item == null) {
+    return;
+  }
+
+  inventory.selected = [props.rowIdx, props.colIdx];
+};
 </script>
 
 <template>
   <div
     :class="
       cn(
-        'relative aspect-square h-full max-h-[100px] w-full max-w-[100px] p-2 dark:bg-neutral-800',
+        'relative aspect-square h-full max-h-[100px] w-full max-w-[100px] p-2 dark:bg-neutral-800 dark:data-[selected=true]:bg-neutral-700',
         $attrs.class as ClassValue
       )
     "
+    @click="click"
     :draggable="item != null"
     @dragstart="dragStart"
     @drop="drop"
     @dragover.prevent
     @dragenter.prevent
+    :data-selected="inventory.selected[0] === rowIdx && inventory.selected[1] === colIdx"
   >
     <div
       v-if="item != null"
@@ -78,3 +88,19 @@ const drop = (e: DragEvent) => {
     </div>
   </div>
 </template>
+
+<style scoped lang="scss">
+@keyframes drop {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.2);
+  }
+}
+
+.dragStart {
+  animation: drop 0.5s ease forwards;
+}
+</style>
