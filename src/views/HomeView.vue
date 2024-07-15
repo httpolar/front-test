@@ -1,26 +1,51 @@
 <script setup lang="ts">
-import InventoryItem from "@/components/InventoryItem.vue";
+import InventoryDescription from "@/components/InventoryDescription.vue";
+import InventoryBottom from "@/components/InventoryBottom.vue";
+import InventorySlot from "@/components/InventorySlot.vue";
 import MainWrapper from "@/components/MainWrapper.vue";
+import { cn } from "@/lib/cn";
 import { useInventoryStore } from "@/stores/inventory";
 
 const inventoryStore = useInventoryStore();
 </script>
 
 <template>
-  <MainWrapper class="flex justify-center items-center">
-    <div class="w-fit flex flex-col gap-6">
+  <MainWrapper class="flex items-center justify-center">
+    <div class="flex w-fit flex-col gap-6">
       <div class="flex flex-row gap-6">
-        <div class="dark:bg-neutral-800 p-4 rounded-md border dark:border-neutral-700 w-[300px]">
-          123123
-        </div>
+        <InventoryDescription />
 
         <div
-          class="dark:bg-neutral-700 grid grid-cols-[repeat(5,minmax(0,120px))] gap-[1px] rounded-md border dark:border-neutral-700"
+          class="grid auto-cols-[100px] grid-cols-1 gap-[1px] rounded-md border dark:border-neutral-700 dark:bg-neutral-700"
         >
-          <InventoryItem v-for="(item, idx) in inventoryStore.items" :key="idx" />
+          <div
+            v-for="(chunk, rowIdx) in inventoryStore.items"
+            :key="`row-${rowIdx}`"
+            class="grid auto-cols-[100px] grid-flow-col grid-rows-1 gap-[1px]"
+          >
+            <InventorySlot
+              v-for="(item, colIdx) in chunk"
+              :item="item"
+              :key="`item-${rowIdx}-${colIdx}`"
+              :class="
+                cn({
+                  'rounded-tl-md': rowIdx === 0 && colIdx === 0,
+                  'rounded-tr-md': rowIdx === 0 && colIdx === chunk.length - 1,
+                  'rounded-bl-md': rowIdx === inventoryStore.items.length - 1 && colIdx === 0,
+                  'rounded-br-md':
+                    rowIdx === inventoryStore.items.length - 1 && colIdx === chunk.length - 1
+                })
+              "
+              :rowIdx="rowIdx"
+              :colIdx="colIdx"
+              :data-row="rowIdx"
+              :data-col="colIdx"
+            />
+          </div>
         </div>
       </div>
-      <div class="dark:bg-neutral-800 p-4 rounded-md border dark:border-neutral-700">123</div>
+
+      <InventoryBottom />
     </div>
   </MainWrapper>
 </template>
