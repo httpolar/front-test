@@ -2,7 +2,7 @@
 import { useInventoryStore } from "@/stores/inventory";
 import type { InventoryItem } from "@/types/inventory-item";
 import { ref } from "vue";
-import XIcon from "./icons/XIcon.vue";
+import XIcon from "./icons/XIconMicro.vue";
 import Button from "./Button.vue";
 
 type Props = {

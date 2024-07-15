@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import XIcon from "@/components/icons/XIcon.vue";
+import XIcon from "@/components/icons/XIconMicro.vue";
 </script>
 
 <template>
