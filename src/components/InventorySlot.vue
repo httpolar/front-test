@@ -77,32 +77,25 @@ const click = () => {
     @dragenter.prevent
     :data-selected="selected[0] === rowIdx && selected[1] === colIdx"
   >
-    <div
-      v-if="item != null"
-      class="flex h-full w-full grid-cols-1 grid-rows-1 items-center justify-center"
+    <Transition
+      leaveFromClass="opacity-100"
+      leaveToClass="opacity-0 scale-50"
+      leaveActiveClass="transition duration-200"
+      enterFromClass="opacity-0 scale-50"
+      enterToClass="opacity-100 scale-100"
+      enterActiveClass="transition duration-200"
     >
-      <img :src="`/img/items/${item.assetName}`" />
       <div
-        class="absolute bottom-0 right-0 flex h-4 items-center justify-center rounded-tl-md border-l border-t px-1 dark:border-neutral-700"
+        v-if="item != null"
+        class="flex h-full w-full grid-cols-1 grid-rows-1 items-center justify-center"
       >
-        <span class="text-xs leading-none dark:text-neutral-400">{{ item.count }}</span>
+        <img :src="`/img/items/${item.assetName}`" />
+        <div
+          class="absolute bottom-0 right-0 flex h-4 items-center justify-center rounded-tl-md border-l border-t px-1 dark:border-neutral-700"
+        >
+          <span class="text-xs leading-none dark:text-neutral-400">{{ item.count }}</span>
+        </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
-
-<style scoped lang="scss">
-@keyframes drop {
-  0% {
-    transform: scale(1);
-  }
-
-  100% {
-    transform: scale(1.2);
-  }
-}
-
-.dragStart {
-  animation: drop 0.5s ease forwards;
-}
-</style>
